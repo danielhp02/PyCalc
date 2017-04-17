@@ -1,12 +1,13 @@
 import tkinter as tk
-from time import sleep
+import os
+
+os.system('xset r off')
 
 # Create window
-window = tk.Tk()
+root = tk.Tk()
 
 # Set the title and size of the window
-window.title("PyCalc")
-# window.geometry("640x480")
+root.title("PyCalc")
 
 # Set the icon of the window (.gif)
 if __file__ == 'code/main.py':
@@ -15,34 +16,48 @@ elif __file__ == 'main.py':
     img = tk.PhotoImage(file='../assets/favicon.gif')
 
 try:
-    window.tk.call('wm', 'iconphoto', window._w, img)
+    root.tk.call('wm', 'iconphoto', root._w, img)
 except NameError:
     print("Icon image not found: please ensure that you are executing from either the 'PyCalc' or 'code' directories.")
 
-def enter():
-    eq = ent.get()
-    ent.delete(0, tk.END)
+def enter(event=None):
+    try:
+        eq = ent.get()
 
-    ent.insert(0, '{0:g}'.format(float(eval(eq))))
+        ent.delete(0, tk.END)
+        ent.insert(0, '{0:g}'.format(float(eval(eq))))
+    except SyntaxError:
+        print("Either something wrong or nothing to evaluate.")
+
+def backspace(event=None):
+    text = ent.get()[:-1]
+    ent.delete(0, tk.END)
+    ent.insert(0, text)
+
+def clear():
+    ent.delete(0, tk.END)
 
 def onButtonClick(btn_id):
     global ent
     ent.insert(tk.END, str(btn_id))
 
 # Widgets
-ent = tk.Entry(window)
+ent = tk.Entry(root)
 ent.grid(columnspan=4)
 
+buttonSymbols = []
 buttons = []
 for num in range(10):
-    btn = tk.Button(window, text=num, font='monospace', command=lambda num=num: onButtonClick(num))
+    btn = tk.Button(root, text=num, font='monospace', command=lambda num=num: onButtonClick(num))
     buttons.append(btn)
+    buttonSymbols.append(num)
 
 for symbol in ['.', '=', '/', '*', '-', '+']:
-    btn = tk.Button(window, text=symbol, font='monospace', command=lambda symbol=symbol: onButtonClick(symbol))
+    btn = tk.Button(root, text=symbol, font='monospace', command=lambda symbol=symbol: onButtonClick(symbol))
     buttons.append(btn)
+    buttonSymbols.append(symbol)
 
-buttons[11] = tk.Button(window, text='=', font='monospace', command=enter)
+buttons[11] = tk.Button(root, text='=', font='monospace', command=enter)
 
 # Draw buttons, 0-9 are the corresponding numbers, 10 and up are symbols
 buttons[9].grid(row=1, column=2)
@@ -63,5 +78,10 @@ buttons[13].grid(row=2, column=3) # *
 buttons[14].grid(row=3, column=3) # -
 buttons[15].grid(row=4, column=3) # +
 
+root.bind('<Return>', enter)
+root.bind('<BackSpace>', backspace)
+
 # Check input and update and things
-window.mainloop()
+root.mainloop()
+
+os.system('xset r on')
